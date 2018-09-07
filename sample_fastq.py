@@ -35,25 +35,30 @@ def main():
     print("")
 
     EstCov = (B_P1 + B_P2)/ (GenomeSize * 1E6)
-    print ("Estimated coverage: "+str(EstCov))
-    Ratio = TargetDepth/EstCov
-
-    print("Subsample target ratio:"+str(Ratio))
-    if Ratio < 1:
-        print ("Writing read_1.fq.gz")
-        ps = subprocess.Popen(('seqtk', 'sample','-s100', P1, str(Ratio)), stdout=subprocess.PIPE)
-        with open('read_1.fq.gz','w') as outfile:
-            output = subprocess.Popen((args.compSoft, '--fast', '-c'), stdin=ps.stdout, stdout=outfile )
-        ps.wait()
-
-        print ("Writing read_2.fq.gz")
-        ps = subprocess.Popen(('seqtk', 'sample', '-s100', P2, str(Ratio)), stdout=subprocess.PIPE)
-        with open('read_2.fq.gz','w') as outfile:
-            output = subprocess.Popen((args.compSoft, '--fast', '-c'), stdin=ps.stdout, stdout=outfile )
-        ps.wait()
-        print("All done. Have a nice day!")
+    
+    if EstCov == 0:
+        from sys import exit as sys_exit
+        sys_exit('Estimated coverage is 0')
     else:
-        print("WARNING: Original depth lower than target depth: Exiting")
+        print ("Estimated coverage: "+str(EstCov))
+        Ratio = TargetDepth/EstCov
+
+        print("Subsample target ratio:"+str(Ratio))
+        if Ratio < 1:
+            print ("Writing read_1.fq.gz")
+            ps = subprocess.Popen(('seqtk', 'sample','-s100', P1, str(Ratio)), stdout=subprocess.PIPE)
+            with open('read_1.fq.gz','w') as outfile:
+                output = subprocess.Popen((args.compSoft, '--fast', '-c'), stdin=ps.stdout, stdout=outfile )
+            ps.wait()
+
+            print ("Writing read_2.fq.gz")
+            ps = subprocess.Popen(('seqtk', 'sample', '-s100', P2, str(Ratio)), stdout=subprocess.PIPE)
+            with open('read_2.fq.gz','w') as outfile:
+                output = subprocess.Popen((args.compSoft, '--fast', '-c'), stdin=ps.stdout, stdout=outfile )
+            ps.wait()
+            print("All done. Have a nice day!")
+        else:
+            print("WARNING: Original depth lower than target depth: Exiting")
 
 if __name__ == "__main__":
         main()
